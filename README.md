@@ -1,6 +1,9 @@
 # apiPHP
  classic php api with docker-compose as microservice
 
+## database
+Mariadb 
+
 ## API Endpoints
 
 ### INSTALLATION
