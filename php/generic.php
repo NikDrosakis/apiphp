@@ -57,7 +57,7 @@ function contains($str,$sub){
 
 function greeklish($str){
 $greekLetters=array('"',"'",'<','>','?',':','*','(',')',' ','-','α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ','ν','ξ','ο','π','ρ','σ','τ','υ','φ','χ','ψ','ω','Α','Β','Γ','Δ','Ε','Ζ','Η','Θ','Ι','Κ','Λ','Μ','Ν','Ξ','Ο','Π','Ρ','Σ','Τ','Υ','Φ','Χ','Ψ','Ω','ά','έ','ή','ί','ό','ύ','ώ','ς');
-$enLetters=array('','','','','','','_','_','_','_','_','a','v','g','d','e','z','i','th','i','k','l','m','n','x','o','p','r','s','t','u','f','h','ps','o','A','B','GET','D','E','Z','I','Th','I','K','L','M','N','X','O','POST','R','S','T','Y','F','Ch','Ps','O','a','e','i','i','o','u','o','s');
+$enLetters=array('','','','','','','_','_','_','_','_','a','v','g','d','e','z','i','th','i','k','l','m','n','x','o','p','r','s','t','u','f','h','ps','o','A','B','G','D','E','Z','I','Th','I','K','L','M','N','X','O','P','R','S','T','Y','F','Ch','Ps','O','a','e','i','i','o','u','o','s');
 return str_replace($greekLetters, $enLetters,$str);
 }
 	
@@ -188,7 +188,7 @@ function format_size($size) {
         $size /= $mod;
     }
     $endIndex = strpos($size, ".")+3;
-    return substr( $size, 0, $endIndex).' '.$units[$i];
+    return substr($size, 0, $endIndex) . ' generic.php' .$units[$i];
 }
 /*
  * in kbs
@@ -196,7 +196,7 @@ function format_size($size) {
 function folder_size($path,$round=false) {
     $total_size = 0;
     $files = scandir($path);
-    $cleanPath = rtrim($path, '/'). '/';
+    $cleanPath = rtrim($path, '/') . 'generic.php/';
 
     foreach($files as $t) {
         if ($t<>"." && $t<>"..") {
@@ -370,7 +370,7 @@ function xrmdir($path)
 
         foreach ($files as $file)
         {
-            xrmdir(realpath($path) . '/' . $file);
+            xrmdir(realpath($path) . 'generic.php/' . $file);
         }
 
         return rmdir($path);
