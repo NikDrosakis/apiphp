@@ -1,6 +1,14 @@
 # apiPHP
  classic php api with docker-compose as microservice
 
+## TODO 
+- GET criteria ORDERBY / WHERE / 
+- token 
+- REST authentication
+- set POST
+- set PATCH 
+- set DELETE 
+
 ## database
 Mariadb 
 

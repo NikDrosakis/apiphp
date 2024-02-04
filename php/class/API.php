@@ -1,20 +1,7 @@
 <?php
 /*
 Main class of REST API
-BUILD access any table
-
- access to db with DB CLASS params required $database, $conf
-[gaiasys.com]
-local="gaiasysl.com"
-mysql=1
-dbhost="localhost"
-dbname="gs"
-dbuser="root"
-dbpass="m130177!"
-redisdb=0
-
-TODO ADD XMS SUPPORT
-UPDATE with dic acccess
+UPDATED 4-2-2024
 */
 class API {
 
@@ -37,28 +24,56 @@ class API {
          //   $this->db->inse("obj",["uid"=>1,"objgroupid"=>1,"filename"=>basename($file)]);
         //}
    }
+//$_SERVER['REQUEST_METHOD'] === 'DELETE' or $_SERVER['REQUEST_METHOD'] === 'PUT'.
     public function response(){
         $this->status_message = $this->conf['status_message'];
-        $this->verb = !empty($_POST) ? 'POST' : (!empty($_GET) ? 'GET' : '');
+       $this->verb = !empty($_POST) ? 'POST' : (!empty($_GET) ? 'GET' : '');
+      // xecho($_SERVER);
+//       $this->verb = $_SERVER['REQUEST_METHOD'];
+//        switch ($this->verb) {
+//            case 'POST':$request = $_POST;break;
+//            case 'GET':$request = $_GET;break;
+//            case 'DELETE':$request = $_DELETE;break;
+//            case 'PUT':
+//            case 'PATCH':
+//                parse_str(file_get_contents('php://input'), $request);
+//                //if the information received cannot be interpreted as an arrangement it is ignored.
+//                if (!is_array($request)) {$request = array();}break;
+//            default:
+//                $request = array();
+//                break;
+//        }
         foreach($_REQUEST as $key =>$val){
             $this->{$key}=$val;
         }
-        if (empty($this->verb) && empty($this->method)){
+        if($this->verb=='GET' && $this->method=='login') {
+            header("Content-Type: application/json; charset=UTF-8");
+            require_once SITE_ROOT . "GET/login.php";
+            $response = array();
+            if($data==='NO'){
+                $status = 403;
+                $status_message = $this->status_message[$status];
+            }else if($data==='OK'){
+                $status = 202;
+                $status_message = $this->status_message[$status];
+            }
+            $response['status'] = $status;
+            $response['status_message'] = $status_message;
+            $response['operation'] = $this->verb;
+            header("HTTP/2 $status $status_message");
+            $response['val'] = $data;
+            echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        }elseif (empty($this->verb) && empty($this->method)){
            include 'view.php';
         } else {
-            header("Content-Type:application/json");
-            if(!isset($_COOKIE['uid'])){
+            $token=base64_encode('mysecrettoken17'); //read token from db bXlzZWNyZXR0b2tlbjE3
+            header("Content-Type: application/json; charset=UTF-8");
+            if(!isset($_GET['token']) || $this->token!=$token){
                 $status = 401;
                 $status_message = $this->status_message[$status];
-            }else {
-				if(!empty($_REQUEST['uid']) && !empty($_REQUEST['grp'])){
-				$user = $this->uid;
-				}else{
-                $user = $this->db->f($_COOKIE['uid'],$_COOKIE['grp']);
-				}
-                //$user = $this->get('my'.$this->id);
-//                if($user!=false && $user['sp']==$_COOKIE['sp']){
-                if($user!=false){
+            }else{
+                //authenticate function
+                if($this->token==$token){
                     if ($this->verb != "") {
                         $sel = $this->{$this->verb}();
                         if (!empty($sel)) {
@@ -83,7 +98,7 @@ class API {
             $response['status_message'] = $status_message;
             $response['operation'] = $this->verb;
             $response['val'] = $sel;
-            echo json_encode($response, JSON_UNESCAPED_UNICODE);
+            echo json_encode($response, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
         }
     }
 
@@ -92,7 +107,7 @@ class API {
      * API METHODS
      * */
     public function GET($db='this')   {
-        $table_array = ["user", "post","obj"];
+        $table_array = ["user", "post","obj","objgroup","tax","comment"];
         if (in_array($this->method, $table_array)) {
                 require_once SITE_ROOT . "GET/table.php";
             }elseif (file_exists(SITE_ROOT . "GET/$this->method.php")) {
@@ -108,15 +123,71 @@ class API {
             require_once "POST/$this->method.php";
             return $data;
         }else{
-            return 'no request';
+            return;
         }
     }
 
     public function DELETE(){
-//        return read_folder($this->GS['API_TEMPLATES']);
+        if(file_exists("DELETE/$this->method.php")) {
+            require_once "DELETE/$this->method.php";
+            return $data;
+        }else{
+            return;
+        }
     }
 
+    public function PUT(){
+        if(file_exists("PUT/$this->method.php")) {
+            require_once "PUT/$this->method.php";
+            return $data;
+        }else{
+            return;
+        }
+    }
 
+    public function register($rtype = 'regSubmit'){
+        $time = time();
+        $name = trim($_POST['username']);
+        $firstname = trim($_POST['firstname']);
+        $lastname = trim($_POST['lastname']);
+        $GRP = $_POST['grp'];
+        $pass = trim($_POST['pass']);
+        $mail = trim($_POST['mail']);
+        //DEFAULT vars
+        $addresszip = json_encode(array(1 => $_POST['addresszip1'], 2 => $_POST['addresszip2']));
+        $afm = $_POST['afm'];
+        $tel = json_encode(array(1 => $_POST['tel'], 2 => ''));
+        $registered = $time;
+        $lang = $_POST['lang']; //according to cookie
+//        $authentication = $a == 'regSubmit' ? (!isset($_COOKIE['affiliate']) ? sha1($name) : '1') : '1';
+        $authentication = $_POST['a'] == 'regSubmit' ? (!isset($_COOKIE['affiliate']) ? ($_POST['price'] > 0 || $_COOKIE['SPAUTH']=='3' ? '3' : '1') : '1') : '1';
+        $modified = $time;
+        $uid=!isset($_POST['id']) ? $_COOKIE['SPREGID'] :$_POST['id'];
+//regural REGISTRATION
+        if ($rtype == 'regSubmit') {
+            $uid = $this->db->inse("ur", array(
+                "grp" => $grp,
+                "name" => $name,
+                "firstname" => $firstname,
+                "lastname" => $lastname,
+                "pass" => $pass,
+                "mail" => $mail,
+                "mpack" => $packs,
+                "addresszip" => $addresszip,
+                "afm" => $afm,
+                "tel" => $tel,
+                "authentication" => $authentication,
+                "streams" => $streams,
+                "status" => 1,
+                "registered" => $registered,
+                "modified" => $modified
+            ));
+        }
+        $data["uid"]=$uid;
+        $data["grp"]=$grp;
+        $data["message"]= !$uid ? "NO" : "OK";
+        return $data;
+    }
     //add to cache
     /*
      * CHECK IF LOGGEDIN

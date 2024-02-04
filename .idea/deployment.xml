@@ -31,6 +31,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="dshphp">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="film_frontend">
         <serverdata>
           <mappings>
@@ -38,7 +45,7 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="gaiabackend">
+      <paths name="gen20gr">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />

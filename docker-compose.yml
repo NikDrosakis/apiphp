@@ -22,22 +22,20 @@ services:
   database:
     container_name: maria
     image: mariadb
-    restart: always
     environment:
       MARIADB_ROOT_PASSWORD: n130177
-      MARIADB_DATABASE: nikosdrosakisgr
+      MARIADB_DATABASE: ga_020424
       MARIADB_USER: dros
       MARIADB_PASSWORD: n130177
     ports:
       - "9906:3306"
     volumes:
-      - ./setup/nikosdrosakisgr.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./setup/ga_020424.sql:/docker-entrypoint-initdb.d/init.sql
       - mydb:/var/lib/mysql
     networks:
       - mynet
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
-    restart: always
     hostname: localhost
     ports:
       - "8021:80"
@@ -45,7 +43,7 @@ services:
       - database
     environment:
       - PMA_HOST=database
-      - PMA_CONTROLUSER=dros
+      - PMA_CONTROLUSER=root
       - PMA_CONTROLPASS=n130177
     networks:
       - mynet

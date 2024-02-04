@@ -5,7 +5,7 @@ $table= $this->method; //t for table
 $id= $this->id;
 
 if($table=='user') {
-    $query = "SELECT * FROM ur WHERE uid=?";
+    $query = "SELECT * FROM user WHERE uid=?";
     $dat=array();
     $dat= $this->db->f($query,array($id));
     //$grp= $dat['grp'];

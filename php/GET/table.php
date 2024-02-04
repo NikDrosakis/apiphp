@@ -1,8 +1,10 @@
 <?php
 $table=$this->method;
 //xecho($_GET);
-if(!isset($this->id)){
+$id=isset($this->id) || isset($this->uid);
+if(!$id){
     $data= $this->db->fa("SELECT * FROM $table");
 }else{
-    $data= $this->db->fa("SELECT * FROM $table WHERE id=?",array($this->id));
+    $key=isset($this->id) ? "id":"uid";
+    $data= $this->db->f("SELECT * FROM $table WHERE $key=?",array($id));
 }

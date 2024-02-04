@@ -849,6 +849,26 @@ function config($DOMAIN='',$rootconfig=false){
 function timed(){
     return date('YmdHis');
 }
+/*
+COOKIES
+*/
+//expires in min
+function coo($con,$row,$expires=1, $domain=SERVERBASE){
+    $arr_cookie_options = $_SERVER['REQUEST_SCHEME']=='http' ?
+        array (
+            'expires' => time()+($expires*60000),
+            'path' => '/',
+            'domain' =>".".$domain // leading dot for compatibility or use subdomain
+        ): array (
+            'expires' => time()+($expires*60000),
+            'path' => '/',
+            'domain' =>$domain, // leading dot for compatibility or use subdomain
+            'secure' => true,     // or false
+            'httponly' => false,    // or false
+            'samesite' => 'None' // None || Lax  || Strict
+        );
+    setcookie($con,$row,$arr_cookie_options);
+}
 //convert timed to datetime format
 function timedt($timed,$format='YmdHis'){
     $dt= str_split($timed);
