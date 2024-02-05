@@ -2,11 +2,11 @@
   "name": "api",
   "version": "0.1.1",
   "maria": "ga_240204",
-  "dbhost": "localhost",
-  "dbpass": "n130177!",
+  "dbhost": "database",
+  "dbpass": "n130177",
   "dbuser": "root",
   "dbname": "ga_240204",
-  "mysql_tables": ["globs"],
+  "mysql_tables": ["globs","user","post"],
   "folders": [
     "crons"
   ],

@@ -1,149 +1,5 @@
 <?php //updated:2020-01-29 20:20:33 DB- v.0.73 - Author:Nikos Drosakis - License: GPL License ?>
 <?php
-/*
-DB class
-Database Connector (Redis, mariadb(mysql), postgresql(not ready),sqlite)
-  v.2 UPDATED multiple mysql database connection and sqlite3
-  v.3 UPDATED support ALL APPLICATION stores even to json and jsonb
-1  PDO MYSQL
-2 PDO SQLITE3
-3  REDIS
-  MONGODB
-  CASSANDRA DB
-  PDO POSTGRES
-
-    $this->_db = new PDO("sqlite:" . SQLITE . $database . ".db");
-  @define('DBTYPE', 'mysql');
-    @define('CURRENT_TIMESTAMP', "UNIX_TIMESTAMP(CURDATE())");
-/* $draft= new PDO('sqlite:sys.db');
-$table="userFirstLast";
-$column="AR";
-$draft->beginTransaction();
-$draft->query("CREATE TEMPORARY TABLE {$table}_backup({$column})");
-$draft->query("INSERT INTO {$table}_backup SELECT {$column} FROM {$table}");
-$draft->query("DROP TABLE {$table}");
-$draft->query("CREATE TABLE {$table}({$column} )");
-$draft->query("INSERT INTO {$table} SELECT {$column}  FROM {$table}_backup");
-$draft->query("DROP TABLE {$table}_backup");
-$draft->commit();
-
-REDIS
-  $this->redis->set("NN".$uid,$nb);
-        $this->redis->del($keys);
-		    public function update($key, $array_key, $array_new_value)
-    {
-//        $db = $this->redisdb($key);
-//        if ($db != false) {
-//            $this->redis->select($db);
-        $array = $this->get($key);
-        $array[$array_key] = $array_new_value;
-        $this->replace($key, json_encode($array, JSON_UNESCAPED_UNICODE));
-//        }else{
-//            return false;
-//        }
-    }
-	    /*  delete
-         * a) multiple keys according to prefix
-         * b) all keys without setting param
-         * @prefix string
-         * Need to add param @service 1 | 2
-    
-    function delp($prefix = '', $service = 1)
-    {
-        foreach ($this->redis->keys($prefix . '*') as $key) {
-            $this->redis->del($key);
-        }
-    }
-	   /*
-    set the key
-    $service is 1: Memcached, 2: Redis
-    !check array keys for redis
-
-    public function set($key, $fetch){
-//        $db = $redisdb!='' ? $redisdb :(int)$this->redisdb($key);
-//        if ($db != false) {
-//            $this->redis->select($db);
-        if (!$fetch) {
-            return false;
-        } else {
-            if (is_int($fetch)) {
-                $this->redis->set($key, $fetch);
-            } elseif (is_array($fetch)) {
-                $fetch = json_encode($fetch, JSON_UNESCAPED_UNICODE);
-//                $this->redis->rawCommand('json.set', $key, '.', json_encode($fetch, JSON_UNESCAPED_UNICODE));
-                $this->redis->setex($key, 1000, $fetch);
-            } elseif (is_json($fetch)) {
-                $this->redis->set($key, $fetch);
-            } else {
-                $this->redis->set($key, $fetch);
-            }
-
-            //pubsub mongo/counters
-//            if ($this->redis->object("encoding", $key)=='int'){
-//                if(substr($key, 0, 1)=="N"){
-//                    $this->redis->publish('N','set.'.$key.'.'.$fetch);
-//                }
-//            }
-            $this->redis->persist($key);
-        }
-    }
-
-    public function append($key,$value){
-        $state=false;
-        $res = $this->redis->exists($key);
-        if ($res) {
-            if($this->redis->append($key, $value)){
-                $state=true;
-//                $this->publish($key, $value);
-            };
-        }else{
-            if($this->redis->set($key, $value)){
-                $state= true;
-//                $this->publish($key, $value);
-            };
-        }
-        return $state;
-    }
-
-    /*
-    $service is Redis
-    read from cache
-  
-    public function get($key, $format = 'arraystring'){
-        $res = $this->redis->exists($key);
-        $type = $this->redis->object("encoding", $key);
-        if ($res) {
-            $get = $this->redis->get($key);
-            if ($type == 'int') {
-                return (int)$get;
-            } elseif (is_json($get)) {
-                return json_decode($get, true);
-            } else {
-                return !$get ? false : $get;
-            }
-        } else {
-            return false;
-        }
-    }
-
-    public function incr($field,$uid=SPID){
-//        $this->redis->incr('N'.$uid.'.'.$field);
-        $this->redis->incr($field);
-//        $this->redis->publish('N',"incr.N".$uid.'.'.$field);
-    }
-    public function decr($field,$uid=SPID){
-//        $this->redis->decr('N'.$uid.'.'.$field);
-        $this->redis->decr($field);
-//        $this->redis->publish('N',"decr.N".$uid.'.'.$field);
-    }
-    //update saving keys to list with lrange
-    public function keys($criteria){
-        //
-        return $this->redis->keys($criteria);
-    }
-
- */
-
 class DB {
     public $_db;
     public $dbt;
@@ -156,7 +12,18 @@ class DB {
 		if($dbt=='maria') {
 		extract($this->confd);
 			//connect to maria/mysql
-			$this->_db = $this->mysql_con($dbhost,$dbname,$dbuser,$dbpass);
+		//	$this->_db = $this->mysql_con($dbhost,$dbname,$dbuser,$dbpass);
+            try	{
+                //mysql:unix_socket=/var/run/mysqld/mysqld.sock;charset=utf8mb4;dbname=$dbname
+                $this->_db =  new PDO("mysql:host=$dbhost;dbname=$dbname",$dbuser,$dbpass);
+                $this->_db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                $this->_db->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+                // throw exceptions, when SQL error is caused
+            }	catch(PDOException $error)	{
+                echo $error->getCode();
+                echo $error->getMessage();
+//            return false;
+            }
 		//	//check if database exists else install gaia.sql
 		//	if($this->_db=="1049"){			//database not exist => create
 		//		$this->create_db($dbname,$dbhost,$dbuser,$dbpass);
@@ -370,27 +237,6 @@ get max value from table
         {
             return -1;
         }
-    }
-	
-    public function mysql_con($dbhost,$dbname,$dbuser,$dbpass){
-        try	{
-			//mysql:unix_socket=/var/run/mysqld/mysqld.sock;charset=utf8mb4;dbname=$dbname
-            return new PDO("mysql:host=$dbhost;dbname=$dbname",$dbuser,$dbpass,
-                array(
-                    PDO::ATTR_ERRMODE,
-                    PDO::ERRMODE_EXCEPTION,
-                    PDO::ERRMODE_WARNING,
-                    PDO::ATTR_EMULATE_PREPARES => FALSE,
-					PDO::MYSQL_ATTR_USE_BUFFERED_QUERY,
-                    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8'",
-                    PDO::ATTR_PERSISTENT => false
-                ));
-
-        }	catch(PDOException $error)	{
-            return $error->getCode();
-//            return false;
-        }
-
     }
 
     public function pgsql_connect($dbname,$dbuser,$dbpass){

@@ -27,9 +27,9 @@ class API {
 //$_SERVER['REQUEST_METHOD'] === 'DELETE' or $_SERVER['REQUEST_METHOD'] === 'PUT'.
     public function response(){
         $this->status_message = $this->conf['status_message'];
-       $this->verb = !empty($_POST) ? 'POST' : (!empty($_GET) ? 'GET' : '');
+//       $this->verb = !empty($_POST) ? 'POST' : (!empty($_GET) ? 'GET' : '');
       // xecho($_SERVER);
-//       $this->verb = $_SERVER['REQUEST_METHOD'];
+       $this->verb = $_SERVER['REQUEST_METHOD'];
 //        switch ($this->verb) {
 //            case 'POST':$request = $_POST;break;
 //            case 'GET':$request = $_GET;break;
@@ -46,6 +46,7 @@ class API {
         foreach($_REQUEST as $key =>$val){
             $this->{$key}=$val;
         }
+
         if($this->verb=='GET' && $this->method=='login') {
             header("Content-Type: application/json; charset=UTF-8");
             require_once SITE_ROOT . "GET/login.php";
@@ -63,17 +64,17 @@ class API {
             header("HTTP/2 $status $status_message");
             $response['val'] = $data;
             echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-        }elseif (empty($this->verb) && empty($this->method)){
+        }elseif (empty($this->method)){
            include 'view.php';
         } else {
             $token=base64_encode('mysecrettoken17'); //read token from db bXlzZWNyZXR0b2tlbjE3
             header("Content-Type: application/json; charset=UTF-8");
-            if(!isset($_GET['token']) || $this->token!=$token){
-                $status = 401;
-                $status_message = $this->status_message[$status];
-            }else{
+         //   if(!isset($_GET['token']) || $this->token!=$token){
+          //      $status = 401;
+         //       $status_message = $this->status_message[$status];
+        //    }else{
                 //authenticate function
-                if($this->token==$token){
+             //   if($this->token==$token){
                     if ($this->verb != "") {
                         $sel = $this->{$this->verb}();
                         if (!empty($sel)) {
@@ -87,11 +88,11 @@ class API {
                         $status = 400;
                         $status_message = $this->status_message[$status];
                     }
-                } else {
-                    $status = 403;
-                    $status_message = $this->status_message[$status];
-                }
-            }
+            //    } else {
+           //         $status = 403;
+            //        $status_message = $this->status_message[$status];
+            //    }
+        //    }
             $response = array();
             header("HTTP/2 $status $status_message");
             $response['status'] = $status;

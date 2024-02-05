@@ -14,14 +14,11 @@ $id=$_COOKIE['uid'];
 $grp=$_COOKIE['grp'];
 $loggedin=isset($_COOKIE['uid']) && isset($_COOKIE['grp']);
 ?>
-<h3>Gaia Apiphp page -
-    <?=$loggedin ? $this->userfullname($id,$grp) : 'Guest user'?>
-</h3>
+<h3>Gaia Apiphp page - Guest </h3>
 <?php
-if($loggedin){
-//    xecho($this->confd);
-//    xecho($this->modconf);
- //   xecho($this->verb);
+if($loggedin){ ?>
+<h3>Gaia Apiphp page - <?=$this->userfullname($id,$grp); ?></h3>
+<?php
     $Parsedown = new Parsedown();
 
     echo $Parsedown->text(file_get_contents("README.md"));
@@ -29,9 +26,6 @@ if($loggedin){
 }else{
     echo "Authentication needed to access page";
 }
-
-
-//include 'sa.php';
 ?>
 </div>
 </body>
